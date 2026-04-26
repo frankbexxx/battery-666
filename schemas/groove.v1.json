@@ -34,6 +34,11 @@
         }
       }
     },
+    "pack_id": {
+      "type": ["string", "null"],
+      "maxLength": 80,
+      "description": "Optional pack id active when the groove was recorded."
+    },
     "loop_beats": {
       "type": "integer",
       "minimum": 1,

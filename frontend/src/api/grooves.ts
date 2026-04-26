@@ -7,6 +7,7 @@ type ApiGroove = {
   title: string | null;
   bpm: number;
   events: GrooveEventV1[];
+  pack_id: string | null;
   loop_beats: number;
   created_at: string;
   updated_at: string;
@@ -29,6 +30,7 @@ function mapGroove(r: ApiGroove): GrooveRecord {
       version: 1,
       bpm: r.bpm,
       events: r.events,
+      pack_id: r.pack_id,
       loop_beats: r.loop_beats,
     },
     created_at: r.created_at,
@@ -47,6 +49,7 @@ export async function createGroove(payload: GroovePayloadV1, title?: string | nu
     title: title ?? null,
     bpm: payload.bpm,
     events: payload.events,
+    pack_id: payload.pack_id ?? null,
     loop_beats: payload.loop_beats ?? 16,
   };
   const res = await fetch(`${base()}/grooves/`, {
@@ -64,6 +67,7 @@ export async function updateGroove(
     title: string | null;
     bpm: number;
     events: GrooveEventV1[];
+    pack_id: string | null;
     loop_beats: number;
   }>
 ) {

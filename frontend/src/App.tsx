@@ -121,7 +121,10 @@ export default function App() {
     const melodySamples = uniqueSamplePads(activePack.melody);
     const sampleCount = drumSamples.length + melodySamples.length;
 
-    if (!sampleCount) return;
+    if (!sampleCount) {
+      setPackStatus(null);
+      return;
+    }
 
     setPackStatus(`A carregar ${sampleCount} sample${sampleCount > 1 ? "s" : ""}...`);
     void Promise.allSettled([
@@ -313,6 +316,7 @@ export default function App() {
       version: 1 as const,
       bpm,
       events: [...events].sort((a, b) => a.t - b.t),
+      pack_id: activePack.id,
       loop_beats,
     };
     try {
@@ -326,6 +330,9 @@ export default function App() {
 
   const loadGroove = (g: GrooveRecord) => {
     setBpm(g.bpm);
+    if (g.payload.pack_id && packs.some((pack) => pack.id === g.payload.pack_id)) {
+      setActivePackId(g.payload.pack_id);
+    }
     setEvents([...g.payload.events].sort((a, b) => a.t - b.t));
     setTab("drums");
     setSaveMsg(`Loaded "${g.title ?? g.id.slice(0, 8)}"`);

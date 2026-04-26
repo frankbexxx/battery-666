@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://groovepad.local/schemas/groove.v1.json",
+  "title": "GroovePadGrooveV1",
+  "type": "object",
+  "required": ["version", "bpm", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1, "description": "Schema version for migrations." },
+    "bpm": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 200,
+      "description": "Beats per minute (quarter notes)."
+    },
+    "events": {
+      "type": "array",
+      "description": "Monotonic hit list. t is seconds from recording start (performance.now()-aligned semantics in clients).",
+      "items": {
+        "type": "object",
+        "required": ["kind", "target", "t"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": { "type": "string", "enum": ["drum", "melody"] },
+          "target": {
+            "type": "string",
+            "description": "Drum pad label (e.g. Kick) or melody note (e.g. C4)."
+          },
+          "t": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Seconds offset from recording start."
+          }
+        }
+      }
+    },
+    "loop_beats": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 512,
+      "description": "Loop length in quarter-note beats. Default 16 (4 bars in 4/4) if omitted when saving."
+    }
+  }
+}

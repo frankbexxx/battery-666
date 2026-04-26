@@ -1,0 +1,59 @@
+# GroovePad
+
+PWA web (React + TypeScript + Web Audio) com API Python opcional para guardar grooves na nuvem.
+
+## Arquivo
+
+O protótipo desktop original (tkinter + pygame) está em [`archive/battery_app.py`](archive/battery_app.py). Ver [`archive/README.md`](archive/README.md) e [`docs/DSP_PORT.md`](docs/DSP_PORT.md) para a migração da lógica de som para [`frontend/src/audio/engine.ts`](frontend/src/audio/engine.ts).
+
+## Audio strategy
+
+**Web Audio API (TypeScript):** síntese procedural no browser; a API em Python só persiste JSON (BPM, eventos, loop).
+
+## Groove format (v1)
+
+See [`schemas/groove.v1.json`](schemas/groove.v1.json) and [`frontend/src/types/groove.ts`](frontend/src/types/groove.ts).
+
+## Local development
+
+Se `sudo apt install python3-venv python3-pip nodejs npm` falhar (versões Python desalinhadas no **resolute**, PEP 668 no `pip --user`, etc.), vê **[`docs/INSTALL_TROUBLESHOOTING.md`](docs/INSTALL_TROUBLESHOOTING.md)** — caminho curto: **`uv`** para o venv + pip, **fnm** ou tarball para Node.
+
+### PostgreSQL
+
+Run Postgres locally (or Docker) and set `DATABASE_URL` for the API.
+
+### Backend
+
+```bash
+cd ~/projects/battery
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp backend/.env.example backend/.env   # edit DATABASE_URL
+cd backend && alembic upgrade head && uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env   # set VITE_API_URL=http://localhost:8000
+npm install
+npm run dev
+```
+
+### Smoke (rápido)
+
+1. Com API: `alembic upgrade head` + `uvicorn` na porta 8000; frontend com `VITE_API_URL=http://localhost:8000`.
+2. Abre o dev server, toca num pad (som), grava, **Play loop**, **Save cloud**; separador Library lista o groove.
+3. Sem API ou com URL errada: pads e loop continuam; banner indica offline ou falta de `VITE_API_URL`.
+
+O bundle PWA deve manter-se enxuto (alvo aspiracional: ~500 KB gzip no chunk principal); síntese Web Audio evita samples pesados.
+
+## Render
+
+Use [`render.yaml`](render.yaml) as a Blueprint.
+
+1. Create the blueprint; provision **groovepad-db** and both web services.
+2. Set **`CORS_ORIGINS`** on `groovepad-api` to your static site URL (e.g. `https://groovepad-web.onrender.com`).
+3. Set **`VITE_API_URL`** on `groovepad-web` to your API URL (e.g. `https://groovepad-api.onrender.com`) and **redeploy** the static site so the build picks up the variable.

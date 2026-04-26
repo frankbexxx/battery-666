@@ -1,0 +1,33 @@
+# https://render.com/docs/blueprint-spec
+databases:
+  - name: groovepad-db
+    databaseName: groovepad
+    user: groovepad
+
+services:
+  - type: web
+    name: groovepad-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: groovepad-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: groovepad-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

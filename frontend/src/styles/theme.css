@@ -1,0 +1,30 @@
+/* Material 3–inspired dark tokens (manual — full control, no MUI) */
+:root {
+  color-scheme: dark;
+
+  --md-sys-color-surface: #121212;
+  --md-sys-color-surface-container: #1e1e1e;
+  --md-sys-color-surface-container-high: #2a2a2a;
+  --md-sys-color-on-surface: #e8e8e8;
+  --md-sys-color-on-surface-variant: #9e9e9e;
+  --md-sys-color-outline: #3d3d3d;
+
+  --md-sys-color-primary: #00dcc0;
+  --md-sys-color-on-primary: #00332c;
+  --md-sys-color-secondary-container: #4a4428;
+  --md-sys-color-on-secondary-container: #ffecb0;
+  --md-sys-color-tertiary: #4fd8ff;
+  --md-sys-color-error: #ff5449;
+
+  --md-sys-shape-corner-full: 9999px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-small: 8px;
+
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --md-sys-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.5);
+
+  --gp-touch-target: 48px;
+  --gp-nav-height: 64px;
+  --gp-safe-bottom: env(safe-area-inset-bottom, 0px);
+}

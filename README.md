@@ -45,10 +45,16 @@ npm run dev
 ### Smoke (rápido)
 
 1. Com API: `alembic upgrade head` + `uvicorn` na porta 8000; frontend com `VITE_API_URL=http://localhost:8000`.
-2. Abre o dev server, toca num pad (som), grava, **Play loop**, **Save cloud**; separador Library lista o groove.
+2. Abre o dev server, troca de **Pack**, toca num pad (som), grava, **Play loop**, **Save cloud**; separador Library lista o groove.
 3. Sem API ou com URL errada: pads e loop continuam; banner indica offline ou falta de `VITE_API_URL`.
 
 O bundle PWA deve manter-se enxuto (alvo aspiracional: ~500 KB gzip no chunk principal); síntese Web Audio evita samples pesados.
+
+## Packs
+
+O catálogo inicial vive em [`frontend/public/packs/manifest.json`](frontend/public/packs/manifest.json). Os packs mudam layout, nomes, cores e BPM sugerido; cada pad pode também definir `sampleUrl` para WAV/OGG em `public/` ou CDN.
+
+Sem `sampleUrl`, o `target` aponta para sons procedurais do Web Audio. Com `sampleUrl`, o browser carrega só os samples do pack ativo e substitui esse `target` no motor, sem partir grooves antigos.
 
 ## Render
 

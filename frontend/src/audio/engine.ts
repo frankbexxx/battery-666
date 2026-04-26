@@ -145,6 +145,7 @@ export class GrooveAudioEngine {
   private master: GainNode | null = null;
   private drumBuffers = new Map<string, AudioBuffer>();
   private noteBuffers = new Map<string, AudioBuffer>();
+  private externalBufferPromises = new Map<string, Promise<AudioBuffer>>();
   private metronomeBuffer: AudioBuffer | null = null;
   private metronomeTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -206,6 +207,33 @@ export class GrooveAudioEngine {
     }
 
     this.metronomeBuffer = generateToneBuffer(c, 800, 0.05, 30);
+  }
+
+  private async loadExternalBuffer(cacheKey: string, url: string): Promise<AudioBuffer> {
+    const ctx = this.ensureContext();
+    this.ensureBuffers();
+    const existing = this.externalBufferPromises.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Sample failed: ${res.status}`);
+        return res.arrayBuffer();
+      })
+      .then((bytes) => ctx.decodeAudioData(bytes.slice(0)));
+
+    this.externalBufferPromises.set(cacheKey, promise);
+    return promise;
+  }
+
+  async loadDrumSample(target: string, url: string): Promise<void> {
+    const buffer = await this.loadExternalBuffer(`drum:${target}:${url}`, url);
+    this.drumBuffers.set(target, buffer);
+  }
+
+  async loadMelodySample(target: string, url: string): Promise<void> {
+    const buffer = await this.loadExternalBuffer(`melody:${target}:${url}`, url);
+    this.noteBuffers.set(target, buffer);
   }
 
   /** Fire-and-forget resume from a user gesture (no await). */

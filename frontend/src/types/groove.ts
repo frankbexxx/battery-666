@@ -14,6 +14,8 @@ export interface GroovePayloadV1 {
   version: 1;
   bpm: number;
   events: GrooveEventV1[];
+  /** Optional pack used when recording; clients may fall back if unavailable. */
+  pack_id?: string | null;
   /** Quarter-note beats per loop; if omitted, clients may infer from last event + bar snap. */
   loop_beats?: number;
 }
@@ -42,7 +44,7 @@ export function normalizePayload(
     .sort((a, b) => a.t - b.t);
   let loop_beats = partial.loop_beats ?? DEFAULT_LOOP_BEATS;
   loop_beats = Math.min(512, Math.max(1, Math.round(loop_beats)));
-  return { version: 1, bpm, events, loop_beats };
+  return { version: 1, bpm, events, pack_id: partial.pack_id ?? null, loop_beats };
 }
 
 /** Beat duration in seconds (one quarter note). */

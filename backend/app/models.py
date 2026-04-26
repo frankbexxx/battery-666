@@ -21,6 +21,7 @@ class Groove(Base):
     title: Mapped[str | None] = mapped_column(String(200), nullable=True)
     bpm: Mapped[int] = mapped_column(Integer, nullable=False)
     events: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    pack_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
     loop_beats: Mapped[int] = mapped_column(Integer, nullable=False, default=16)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, nullable=False

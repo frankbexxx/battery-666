@@ -17,6 +17,7 @@ def groove_to_read(g: models.Groove) -> schemas.GrooveRead:
         title=g.title,
         bpm=g.bpm,
         events=[schemas.GrooveEventSchema(**e) for e in g.events],
+        pack_id=g.pack_id,
         loop_beats=g.loop_beats,
         created_at=g.created_at,
         updated_at=g.updated_at,
@@ -30,6 +31,7 @@ def create_groove(db: Session, data: schemas.GrooveCreate) -> models.Groove:
         title=data.title,
         bpm=data.bpm,
         events=events,
+        pack_id=data.pack_id,
         loop_beats=loop,
         created_at=utcnow(),
         updated_at=utcnow(),
@@ -66,6 +68,8 @@ def update_groove(
         row.bpm = data.bpm
     if data.events is not None:
         row.events = [e.model_dump() for e in sorted(data.events, key=lambda x: x.t)]
+    if data.pack_id is not None:
+        row.pack_id = data.pack_id
     if data.loop_beats is not None:
         row.loop_beats = data.loop_beats
     row.updated_at = utcnow()

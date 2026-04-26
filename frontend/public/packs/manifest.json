@@ -34,13 +34,13 @@
       "id": "club-neon",
       "name": "Club Neon",
       "genre": "House",
-      "description": "Dance layout with brighter labels, still using the fast procedural engine.",
+      "description": "Dance layout with a few lazy-loaded demo WAV hits plus procedural fallbacks.",
       "suggestedBpm": 124,
       "drums": [
-        { "label": "Club Kick", "target": "Kick", "color": "#00e676" },
-        { "label": "Backbeat", "target": "Snare", "color": "#ffea00" },
+        { "label": "Club Kick", "target": "club-neon:kick", "color": "#00e676", "sampleUrl": "/packs/club-neon/kick.wav" },
+        { "label": "Backbeat", "target": "club-neon:snare", "color": "#ffea00", "sampleUrl": "/packs/club-neon/snare.wav" },
         { "label": "Clap Stack", "target": "Clap", "color": "#ff4081" },
-        { "label": "Hat Tight", "target": "Closed HH", "color": "#40c4ff" },
+        { "label": "Hat Tight", "target": "club-neon:hat", "color": "#40c4ff", "sampleUrl": "/packs/club-neon/hat.wav" },
         { "label": "Hat Open", "target": "Open HH", "color": "#00b0ff" },
         { "label": "Low Fill", "target": "Tom Low", "color": "#69f0ae" },
         { "label": "Mid Fill", "target": "Tom Mid", "color": "#64ffda" },
@@ -49,7 +49,7 @@
         { "label": "Tick", "target": "Perc 2", "color": "#b388ff" }
       ],
       "melody": [
-        { "label": "Root", "target": "C4", "color": "#ffff00" },
+        { "label": "Root", "target": "club-neon:root", "color": "#ffff00", "sampleUrl": "/packs/club-neon/root.wav" },
         { "label": "2nd", "target": "D4", "color": "#ffee58" },
         { "label": "3rd", "target": "E4", "color": "#ffeb3b" },
         { "label": "4th", "target": "F4", "color": "#fdd835" },

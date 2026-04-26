@@ -15,6 +15,7 @@ class GroovePayloadSchema(BaseModel):
     version: Literal[1] = 1
     bpm: int = Field(..., ge=60, le=200)
     events: list[GrooveEventSchema]
+    pack_id: str | None = Field(default=None, max_length=80)
     loop_beats: int | None = Field(default=None, ge=1, le=512)
 
     @field_validator("events")
@@ -27,6 +28,7 @@ class GrooveCreate(BaseModel):
     title: str | None = Field(default=None, max_length=200)
     bpm: int = Field(..., ge=60, le=200)
     events: list[GrooveEventSchema]
+    pack_id: str | None = Field(default=None, max_length=80)
     loop_beats: int | None = Field(default=16, ge=1, le=512)
 
 
@@ -34,6 +36,7 @@ class GrooveUpdate(BaseModel):
     title: str | None = Field(default=None, max_length=200)
     bpm: int | None = Field(default=None, ge=60, le=200)
     events: list[GrooveEventSchema] | None = None
+    pack_id: str | None = Field(default=None, max_length=80)
     loop_beats: int | None = Field(default=None, ge=1, le=512)
 
 
@@ -42,6 +45,7 @@ class GrooveRead(BaseModel):
     title: str | None
     bpm: int
     events: list[GrooveEventSchema]
+    pack_id: str | None
     loop_beats: int
     created_at: datetime
     updated_at: datetime

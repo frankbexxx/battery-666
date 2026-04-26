@@ -56,6 +56,8 @@ O catálogo inicial vive em [`frontend/public/packs/manifest.json`](frontend/pub
 
 Sem `sampleUrl`, o `target` aponta para sons procedurais do Web Audio. Com `sampleUrl`, o browser carrega só os samples do pack ativo e substitui esse `target` no motor, sem partir grooves antigos.
 
+Grooves novos guardam `pack_id` opcional para conseguir reabrir o pack certo a partir da Library. O pack **Club Neon** inclui alguns WAVs leves de demonstração em `frontend/public/packs/club-neon/`.
+
 ## Render
 
 Use [`render.yaml`](render.yaml) as a Blueprint.

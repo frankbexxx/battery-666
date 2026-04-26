@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "packs": [
+    {
+      "id": "classic-synth",
+      "name": "Classic Synth",
+      "genre": "Starter",
+      "description": "Procedural drums and simple melody tones.",
+      "suggestedBpm": 120,
+      "drums": [
+        { "label": "Kick", "target": "Kick", "color": "#00e5d4" },
+        { "label": "Snare", "target": "Snare", "color": "#ffb300" },
+        { "label": "Clap", "target": "Clap", "color": "#ff7043" },
+        { "label": "Closed HH", "target": "Closed HH", "color": "#90caf9" },
+        { "label": "Open HH", "target": "Open HH", "color": "#64b5f6" },
+        { "label": "Tom Low", "target": "Tom Low", "color": "#a5d6a7" },
+        { "label": "Tom Mid", "target": "Tom Mid", "color": "#81c784" },
+        { "label": "Tom High", "target": "Tom High", "color": "#66bb6a" },
+        { "label": "Perc 1", "target": "Perc 1", "color": "#ce93d8" },
+        { "label": "Perc 2", "target": "Perc 2", "color": "#ba68c8" }
+      ],
+      "melody": [
+        { "label": "C4", "target": "C4", "color": "#fdd835" },
+        { "label": "D4", "target": "D4", "color": "#fdd835" },
+        { "label": "E4", "target": "E4", "color": "#fdd835" },
+        { "label": "F4", "target": "F4", "color": "#fdd835" },
+        { "label": "G4", "target": "G4", "color": "#fdd835" },
+        { "label": "A4", "target": "A4", "color": "#fdd835" },
+        { "label": "B4", "target": "B4", "color": "#fdd835" },
+        { "label": "C5", "target": "C5", "color": "#fdd835" }
+      ]
+    },
+    {
+      "id": "club-neon",
+      "name": "Club Neon",
+      "genre": "House",
+      "description": "Dance layout with brighter labels, still using the fast procedural engine.",
+      "suggestedBpm": 124,
+      "drums": [
+        { "label": "Club Kick", "target": "Kick", "color": "#00e676" },
+        { "label": "Backbeat", "target": "Snare", "color": "#ffea00" },
+        { "label": "Clap Stack", "target": "Clap", "color": "#ff4081" },
+        { "label": "Hat Tight", "target": "Closed HH", "color": "#40c4ff" },
+        { "label": "Hat Open", "target": "Open HH", "color": "#00b0ff" },
+        { "label": "Low Fill", "target": "Tom Low", "color": "#69f0ae" },
+        { "label": "Mid Fill", "target": "Tom Mid", "color": "#64ffda" },
+        { "label": "High Fill", "target": "Tom High", "color": "#18ffff" },
+        { "label": "Snap", "target": "Perc 1", "color": "#ea80fc" },
+        { "label": "Tick", "target": "Perc 2", "color": "#b388ff" }
+      ],
+      "melody": [
+        { "label": "Root", "target": "C4", "color": "#ffff00" },
+        { "label": "2nd", "target": "D4", "color": "#ffee58" },
+        { "label": "3rd", "target": "E4", "color": "#ffeb3b" },
+        { "label": "4th", "target": "F4", "color": "#fdd835" },
+        { "label": "5th", "target": "G4", "color": "#fbc02d" },
+        { "label": "6th", "target": "A4", "color": "#f9a825" },
+        { "label": "7th", "target": "B4", "color": "#f57f17" },
+        { "label": "Oct", "target": "C5", "color": "#fff176" }
+      ]
+    }
+  ]
+}

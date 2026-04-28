@@ -63,11 +63,13 @@ Este documento **substitui o blueprint genérico** “desktop Python primeiro”
 - **Offline / rede:** mensagens claras quando a API falha; modo “só local” explícito na UI.
 - **VM / som:** documentação mínima (já visto na prática).
 
-### Fase 2 — Packs & género (primeira extensão de conteúdo)
+### Fase 2 — Feito (Packs & género)
 
 - **Manifest de pack** (JSON) + pastas `public/packs/...` ou CDN.
 - **Selector de pack / género** (cards no topo ou rail).
 - **Lazy load** de buffers; barra de progresso ao trocar de pack.
+- Persistência de `pack_id` para reabrir grooves com o pack certo.
+- Pack **Club Neon** com samples WAV leves de demonstração e fallbacks procedurais.
 
 ### Fase 3 — Live layers (coração “Music Maker”)
 
@@ -122,7 +124,7 @@ Este documento **substitui o blueprint genérico** “desktop Python primeiro”
 - Cada sessão: **uma super-onda** (prompt único: contexto, DoD, ficheiros, riscos) + **lista fechada de TODOS** dessa fase.
 - **Regra:** não abrir fase N+1 até o **DoD** da fase N (secção 8) estar verificado.
 
-### Fase 1 — TODOS (1ª onda)
+### Fase 1 — TODOS (1ª onda) — Feito
 
 1. Motor de loop com **`AudioContext.currentTime`** (menos `setInterval` musical; documentar limites).
 2. **Feedback visual** por pad ao disparar som.
@@ -131,7 +133,41 @@ Este documento **substitui o blueprint genérico** “desktop Python primeiro”
 5. **Smoke** no README (toque + gravar + loop + refresh).
 6. (Opcional) Nota de **bundle** no PR (meta para o shell).
 
-*(Fases 2+: listas completas quando fecharmos a Fase 1.)*
+### Fase 2 — TODOS (2ª onda) — Feito
+
+1. Criar catálogo de packs em `frontend/public/packs/manifest.json`.
+2. Criar tipos/loader de packs em `frontend/src/packs/`.
+3. Adicionar selector de pack na UI.
+4. Separar label do pad de `target` interno para não partir grooves antigos.
+5. Suportar `sampleUrl` com lazy loading de WAV/OGG por pack ativo.
+6. Incluir JSON dos packs no precache PWA.
+7. Guardar `pack_id` no groove e migrar DB com Alembic.
+8. Adicionar pack demo **Club Neon** com samples leves.
+9. Validar build frontend + migração backend.
+
+### Fase 3 — TODOS (3ª onda)
+
+1. Definir modelo local de **layers** sem migrar ainda para schema v2:
+   - `drums`
+   - `melody`
+   - `perc/fx` se couber sem complexidade extra.
+2. Criar UI compacta de layers com:
+   - nome
+   - mute
+   - solo
+   - volume.
+3. Encaminhar eventos gravados para a layer ativa.
+4. Fazer playback respeitar mute/solo/volume por layer.
+5. Manter compatibilidade com grooves v1:
+   - grooves antigos carregam numa layer default.
+   - saves continuam possíveis enquanto v2 não for necessário.
+6. Avaliar se v2 é obrigatório depois do protótipo de layers.
+7. Adicionar **quantização opcional** como toggle simples:
+   - gravação snap 1/16
+   - playback snap 1/16
+   - desligado por defeito se afetar feeling.
+
+**DoD Fase 3:** abrir a URL, escolher pack, gravar drums e melody em layers separadas, mutar/solar uma layer, ajustar volume, tocar loop sincronizado e guardar/carregar sem perder o groove.
 
 ---
 

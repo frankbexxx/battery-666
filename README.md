@@ -14,6 +14,10 @@ O protótipo desktop original (tkinter + pygame) está em [`archive/battery_app.
 
 See [`schemas/groove.v1.json`](schemas/groove.v1.json) and [`frontend/src/types/groove.ts`](frontend/src/types/groove.ts).
 
+## User help
+
+Ver [`docs/USER_HELP.md`](docs/USER_HELP.md) para saber o que cada botão faz na app.
+
 ## Local development
 
 Se `sudo apt install python3-venv python3-pip nodejs npm` falhar (versões Python desalinhadas no **resolute**, PEP 668 no `pip --user`, etc.), vê **[`docs/INSTALL_TROUBLESHOOTING.md`](docs/INSTALL_TROUBLESHOOTING.md)** — caminho curto: **`uv`** para o venv + pip, **fnm** ou tarball para Node.

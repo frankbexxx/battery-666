@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isApiUrlConfigured, pingApiHealth } from "./api/health";
 import { createGroove, listGrooves } from "./api/grooves";
 import { GrooveAudioEngine } from "./audio/engine";
+import { LayerMixer, type LayerRow } from "./components/LayerMixer";
 import { LibraryPanel } from "./components/LibraryPanel";
 import { PadGrid } from "./components/PadGrid";
 import { PackSelector } from "./components/PackSelector";
@@ -14,8 +15,15 @@ import type { GrooveEventV1, GrooveRecord } from "./types/groove";
 import { DEFAULT_LOOP_BEATS } from "./types/groove";
 
 type Tab = "drums" | "melody" | "library";
+type LayerId = "drums" | "melody" | "fx";
+type LayeredEvent = GrooveEventV1 & { layer: LayerId };
 
 const engine = new GrooveAudioEngine();
+const DEFAULT_LAYERS: LayerRow[] = [
+  { id: "drums", name: "Drums", mute: false, solo: false, volume: 1 },
+  { id: "melody", name: "Melody", mute: false, solo: false, volume: 1 },
+  { id: "fx", name: "FX", mute: false, solo: false, volume: 1 },
+];
 
 function repeatPads(pads: PackPad[], total = 16): PackPad[] {
   const out: PackPad[] = [];
@@ -48,6 +56,10 @@ function uniqueSamplePads(pads: PackPad[]): PackPad[] {
   });
 }
 
+function baseLayerForKind(kind: GrooveEventV1["kind"]): LayerId {
+  return kind === "drum" ? "drums" : "melody";
+}
+
 export default function App() {
   const shellRef = useRef<HTMLDivElement>(null);
   useAudioPrime(engine, shellRef);
@@ -56,8 +68,10 @@ export default function App() {
   const [bpm, setBpm] = useState(120);
   const [metronomeOn, setMetronomeOn] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [events, setEvents] = useState<GrooveEventV1[]>([]);
+  const [layeredEvents, setLayeredEvents] = useState<LayeredEvent[]>([]);
   const [loopPlaying, setLoopPlaying] = useState(false);
+  const [layers, setLayers] = useState<LayerRow[]>(DEFAULT_LAYERS);
+  const [activeLayerId, setActiveLayerId] = useState<LayerId>("drums");
   const [library, setLibrary] = useState<GrooveRecord[]>([]);
   const [libraryErr, setLibraryErr] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
@@ -82,6 +96,22 @@ export default function App() {
   const melodyGrid = useMemo(() => melodyPads.map((pad) => pad.label), [melodyPads]);
   const drumColors = useMemo(() => drumPads.map((pad) => pad.color), [drumPads]);
   const melodyColors = useMemo(() => melodyPads.map((pad) => pad.color), [melodyPads]);
+  const layerById = useMemo(() => new Map(layers.map((layer) => [layer.id, layer])), [layers]);
+  const activeSoloIds = useMemo(
+    () => new Set(layers.filter((layer) => layer.solo).map((layer) => layer.id)),
+    [layers]
+  );
+
+  const getLayerGain = useCallback(
+    (layerId: LayerId) => {
+      const layer = layerById.get(layerId);
+      if (!layer) return 1;
+      if (activeSoloIds.size > 0 && !activeSoloIds.has(layerId)) return 0;
+      if (layer.mute) return 0;
+      return layer.volume;
+    },
+    [activeSoloIds, layerById]
+  );
 
   useEffect(() => {
     if (metronomeOn) engine.startMetronome(bpm);
@@ -147,6 +177,19 @@ export default function App() {
     if (pack) setBpm(pack.suggestedBpm);
   }, [packs]);
 
+  const onToggleLayerMute = useCallback((id: string) => {
+    setLayers((prev) => prev.map((layer) => (layer.id === id ? { ...layer, mute: !layer.mute } : layer)));
+  }, []);
+
+  const onToggleLayerSolo = useCallback((id: string) => {
+    setLayers((prev) => prev.map((layer) => (layer.id === id ? { ...layer, solo: !layer.solo } : layer)));
+  }, []);
+
+  const onLayerVolumeChange = useCallback((id: string, volume: number) => {
+    const v = Math.min(1, Math.max(0, volume));
+    setLayers((prev) => prev.map((layer) => (layer.id === id ? { ...layer, volume: v } : layer)));
+  }, []);
+
   const apiConfigured = isApiUrlConfigured();
 
   useEffect(() => {
@@ -175,6 +218,11 @@ export default function App() {
     if (localOnly && tab === "library") setTab("drums");
   }, [localOnly, tab]);
 
+  useEffect(() => {
+    if (tab === "drums") setActiveLayerId("drums");
+    if (tab === "melody") setActiveLayerId("melody");
+  }, [tab]);
+
   const triggerPadFlash = useCallback((kind: "drums" | "melody", index: number) => {
     setPadFlash({ kind, index });
     if (padFlashTimer.current) clearTimeout(padFlashTimer.current);
@@ -194,16 +242,17 @@ export default function App() {
       const target = drumPads[index]?.target;
       if (!target) return;
       triggerPadFlash("drums", index);
+      const gain = getLayerGain(activeLayerId);
       void (async () => {
         await engine.resume();
-        engine.playDrum(target);
+        if (gain > 0) engine.playDrum(target, undefined, gain);
       })();
       if (recording) {
         const t = (performance.now() - recordStart.current) / 1000;
-        setEvents((prev) => [...prev, { kind: "drum", target, t }]);
+        setLayeredEvents((prev) => [...prev, { kind: "drum", target, t, layer: activeLayerId }]);
       }
     },
-    [drumPads, recording, triggerPadFlash]
+    [activeLayerId, drumPads, getLayerGain, recording, triggerPadFlash]
   );
 
   const onMelodyPad = useCallback(
@@ -211,34 +260,35 @@ export default function App() {
       const target = melodyPads[index]?.target;
       if (!target) return;
       triggerPadFlash("melody", index);
+      const gain = getLayerGain(activeLayerId);
       void (async () => {
         await engine.resume();
-        engine.playMelody(target);
+        if (gain > 0) engine.playMelody(target, undefined, gain);
       })();
       if (recording) {
         const t = (performance.now() - recordStart.current) / 1000;
-        setEvents((prev) => [...prev, { kind: "melody", target, t }]);
+        setLayeredEvents((prev) => [...prev, { kind: "melody", target, t, layer: activeLayerId }]);
       }
     },
-    [melodyPads, recording, triggerPadFlash]
+    [activeLayerId, getLayerGain, melodyPads, recording, triggerPadFlash]
   );
 
   const toggleRecord = async () => {
     await engine.resume();
     if (!recording) {
-      setEvents([]);
+      setLayeredEvents([]);
       recordStart.current = performance.now();
       setRecording(true);
       setSaveMsg(null);
     } else {
       setRecording(false);
-      setEvents((prev) => [...prev].sort((a, b) => a.t - b.t));
+      setLayeredEvents((prev) => [...prev].sort((a, b) => a.t - b.t));
     }
   };
 
   const clearAll = () => {
     stopLoopPlayback();
-    setEvents([]);
+    setLayeredEvents([]);
     setRecording(false);
   };
 
@@ -254,14 +304,20 @@ export default function App() {
       stopLoopPlayback();
       return;
     }
-    if (!events.length) return;
+    if (!layeredEvents.length) return;
     await engine.resume();
-    const loopBeats = computeLoopBeats(bpm, events);
+    const plainEvents = layeredEvents.map((event) => ({
+      kind: event.kind,
+      target: event.target,
+      t: event.t,
+      gain: getLayerGain(event.layer),
+    }));
+    const loopBeats = computeLoopBeats(bpm, plainEvents);
 
     let nextStartAt: number | undefined;
     const scheduleNext = () => {
       const arm = () => {
-        const { start, loopDurationSec } = engine.scheduleLoop(bpm, events, loopBeats, nextStartAt);
+        const { start, loopDurationSec } = engine.scheduleLoop(bpm, plainEvents, loopBeats, nextStartAt);
         nextStartAt = start + loopDurationSec;
         const now = engine.getCurrentAudioTime();
         const delayMs = Math.max(8, (nextStartAt - now) * 1000 - 5);
@@ -307,10 +363,11 @@ export default function App() {
       setSaveMsg("Cloud save disabled (modo local ou API indisponível).");
       return;
     }
-    if (!events.length) {
+    if (!layeredEvents.length) {
       setSaveMsg("Nothing to save — record something first.");
       return;
     }
+    const events = layeredEvents.map(({ kind, target, t }) => ({ kind, target, t }));
     const loop_beats = computeLoopBeats(bpm, events);
     const payload = {
       version: 1 as const,
@@ -333,7 +390,11 @@ export default function App() {
     if (g.payload.pack_id && packs.some((pack) => pack.id === g.payload.pack_id)) {
       setActivePackId(g.payload.pack_id);
     }
-    setEvents([...g.payload.events].sort((a, b) => a.t - b.t));
+    setLayeredEvents(
+      [...g.payload.events]
+        .sort((a, b) => a.t - b.t)
+        .map((event) => ({ ...event, layer: baseLayerForKind(event.kind) }))
+    );
     setTab("drums");
     setSaveMsg(`Loaded "${g.title ?? g.id.slice(0, 8)}"`);
   };
@@ -360,6 +421,15 @@ export default function App() {
             Sem <code className="gp-code">VITE_API_URL</code> — só áudio local; define URL da API para Library e Save cloud.
           </div>
         ) : null}
+
+        <LayerMixer
+          layers={layers}
+          activeLayerId={activeLayerId}
+          onActiveLayerChange={(id) => setActiveLayerId(id as LayerId)}
+          onToggleMute={onToggleLayerMute}
+          onToggleSolo={onToggleLayerSolo}
+          onVolumeChange={onLayerVolumeChange}
+        />
 
         <div className="gp-tabs-root">
           <Tabs.Content value="drums" className="gp-tab-content gp-main-spacer">
@@ -406,7 +476,7 @@ export default function App() {
           onToggleRecord={() => void toggleRecord()}
           loopPlaying={loopPlaying}
           onToggleLoop={() => void toggleLoop()}
-          hasEvents={events.length > 0}
+          hasEvents={layeredEvents.length > 0}
           onClear={clearAll}
           onStopAll={stopAll}
           onSaveCloud={() => void saveCloud()}

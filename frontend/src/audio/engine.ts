@@ -247,7 +247,7 @@ export class GrooveAudioEngine {
    * Start drum sample at AudioContext time `at`.
    * Use only when `ctx.state === "running"` (live pads after prime, or loop scheduler).
    */
-  startDrumAt(name: string, at: number): void {
+  startDrumAt(name: string, at: number, gain = 1): void {
     const ctx = this.ctx;
     if (!ctx || ctx.state !== "running") return;
     this.ensureBuffers();
@@ -255,11 +255,14 @@ export class GrooveAudioEngine {
     if (!buf) return;
     const src = ctx.createBufferSource();
     src.buffer = buf;
-    src.connect(this.getOutput());
+    const g = ctx.createGain();
+    g.gain.value = Math.max(0, gain);
+    src.connect(g);
+    g.connect(this.getOutput());
     src.start(at);
   }
 
-  startMelodyAt(note: string, at: number): void {
+  startMelodyAt(note: string, at: number, gain = 1): void {
     const ctx = this.ctx;
     if (!ctx || ctx.state !== "running") return;
     this.ensureBuffers();
@@ -267,39 +270,42 @@ export class GrooveAudioEngine {
     if (!buf) return;
     const src = ctx.createBufferSource();
     src.buffer = buf;
-    src.connect(this.getOutput());
+    const g = ctx.createGain();
+    g.gain.value = Math.max(0, gain);
+    src.connect(g);
+    g.connect(this.getOutput());
     src.start(at);
   }
 
   /** Live pad hit — synchronous when context already running (low latency). */
-  playDrum(name: string, when?: number): void {
+  playDrum(name: string, when?: number, gain = 1): void {
     const ctx = this.ctx;
     if (!ctx) {
-      void this.resume().then(() => this.playDrum(name, when));
+      void this.resume().then(() => this.playDrum(name, when, gain));
       return;
     }
     if (ctx.state !== "running") {
-      void ctx.resume().then(() => this.playDrum(name, when));
+      void ctx.resume().then(() => this.playDrum(name, when, gain));
       return;
     }
     this.ensureBuffers();
     const at = when ?? ctx.currentTime;
-    this.startDrumAt(name, at);
+    this.startDrumAt(name, at, gain);
   }
 
-  playMelody(note: string, when?: number): void {
+  playMelody(note: string, when?: number, gain = 1): void {
     const ctx = this.ctx;
     if (!ctx) {
-      void this.resume().then(() => this.playMelody(note, when));
+      void this.resume().then(() => this.playMelody(note, when, gain));
       return;
     }
     if (ctx.state !== "running") {
-      void ctx.resume().then(() => this.playMelody(note, when));
+      void ctx.resume().then(() => this.playMelody(note, when, gain));
       return;
     }
     this.ensureBuffers();
     const at = when ?? ctx.currentTime;
-    this.startMelodyAt(note, at);
+    this.startMelodyAt(note, at, gain);
   }
 
   stopAll(): void {
@@ -339,7 +345,7 @@ export class GrooveAudioEngine {
 
   scheduleLoop(
     bpm: number,
-    events: { kind: "drum" | "melody"; target: string; t: number }[],
+    events: { kind: "drum" | "melody"; target: string; t: number; gain?: number }[],
     loopBeats: number,
     startAt?: number
   ): { loopDurationSec: number; start: number } {
@@ -354,8 +360,8 @@ export class GrooveAudioEngine {
     const sorted = [...events].sort((a, b) => a.t - b.t);
     for (const ev of sorted) {
       const when = t0 + ev.t;
-      if (ev.kind === "drum") this.startDrumAt(ev.target, when);
-      else this.startMelodyAt(ev.target, when);
+      if (ev.kind === "drum") this.startDrumAt(ev.target, when, ev.gain ?? 1);
+      else this.startMelodyAt(ev.target, when, ev.gain ?? 1);
     }
     return { loopDurationSec, start: t0 };
   }
